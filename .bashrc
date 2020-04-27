@@ -117,3 +117,30 @@ if ! shopt -oq posix; then
 fi
 
 export QSYS_ROOTDIR="/home/avatichi/intelFPGA_lite/17.1/quartus/sopc_builder/bin"
+
+parse_git_branch() {
+     git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/(\1) /'
+}
+
+PROMPT_COMMAND=__prompt_command # Func to gen PS1 after CMDs
+
+__prompt_command() {
+    local EXIT="$?"             # This needs to be first
+    PS1=""
+
+    local PS1_RESET="\[$(tput sgr0)\]"
+    local PS1_GIT="\[\033[33m\]\$(parse_git_branch)"
+    local PS1_TIME="\[\033[38;5;38m\]\A"
+    local PS1_USER="\[$(tput sgr0)\]\[$(tput bold)\]\[\033[38;5;82m\]\u"
+    local PS1_HOST="\h"
+    local PS1_WORKING_D="\[\033[38;5;31m\]\w"
+    local PS1_RETURN=""
+
+    if [ $EXIT != 0 ]; then
+        PS1_RETURN+="\[\e[0;31m\]$EXIT"      # Add red if exit code non 0
+    else
+        PS1_RETURN+="\[\e[0;32m\]$EXIT"
+    fi
+
+    export PS1="$PS1_GIT$PS1_RETURN $PS1_TIME $PS1_USER@$PS1_HOST$PS1_RESET:$PS1_WORKING_D$PS1_RESET\\$ "
+}
